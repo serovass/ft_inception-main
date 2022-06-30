@@ -1,0 +1,30 @@
+server {
+    listen 80;
+    server_name gnaida.42.fr www.gnaida.42.fr;
+
+    #include snippets/letsencrypt.conf;
+    return 301 https://gnaida.42.fr$request_uri;
+}
+
+server {
+	listen 443 ssl http2;
+	listen [::]:443 ssl http2;
+	server_name gnaida.42.fr;
+
+	ssl on;
+	ssl_certificate /etc/ssl/nginx-selfsigned.crt;
+	ssl_certificate_key /etc/ssl/nginx-selfsigned.key;
+	ssl_protocols TLSv1.2 TLSv1.3;
+
+	root /var/www/html/gnaida.42.fr;
+	index index.php index.html;
+
+	location / {
+		try_files $uri $uri/ =404;
+	}
+
+	location ~ \.php$ {
+		include snippets/fastcgi-php.conf;
+		fastcgi_pass mycontainer_wordpress:9000;
+	}
+}

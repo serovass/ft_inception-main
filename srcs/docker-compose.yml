@@ -1,0 +1,62 @@
+version: '3.1'
+
+networks:
+  inception-net:
+    driver: bridge
+
+services:
+
+  myimage_web:
+    build: requirements/nginx/
+    restart: always
+    depends_on:
+      - myimage_wordpress
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - wordpress:/var/www/html
+    networks:
+      - inception-net
+    container_name: mycontainer_web
+
+  myimage_wordpress:
+    build: requirements/wordpress/
+    env_file: .env
+    restart: always
+    depends_on:
+      - myimage_db
+    volumes:
+      - wordpress:/var/www/html
+    networks:
+      - inception-net
+    container_name: mycontainer_wordpress
+
+  myimage_db:
+    build: requirements/mariadb/
+    env_file: .env
+    restart: always
+    volumes:
+      - db:/home/gnaida/data/db/mysql
+    networks:
+      - inception-net
+    container_name: mycontainer_db
+
+volumes:
+  wordpress:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/gnaida/data/wordpress
+  db:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/gnaida/data/db
+
+# networks:
+#   inception:
+#     name: inception_net
+#     driver: bridge
